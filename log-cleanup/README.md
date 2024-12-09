@@ -2,7 +2,7 @@
 
 A maintenance workflow that you can deploy into Airflow to periodically clean out the task logs to avoid those getting too big.
 
-- **airflow-log-cleanup.py**: Allows to delete logs by specifying the **number** of worker nodes. Does not guarantee log deletion of all nodes. 
+- **airflow-log-cleanup.py**: Allows to delete logs by specifying the **number** of worker nodes. Does not guarantee log deletion of all nodes.
 - **airflow-log-cleanup-pwdless-ssh.py**: Allows to delete logs by specifying the list of worker nodes by their hostname. Requires the `airflow` user to have passwordless ssh to access all nodes.
 
 ## Deploy
@@ -28,7 +28,7 @@ A maintenance workflow that you can deploy into Airflow to periodically clean ou
 
 4. Enable the DAG in the Airflow Webserver
 
-### airflow-log-cleanup-pwdless-ssh.py ###
+### airflow-log-cleanup-pwdless-ssh.py
 
 1. Copy the airflow-log-cleanup-pwdless-ssh.py file to this dags directory
 
@@ -44,7 +44,7 @@ A maintenance workflow that you can deploy into Airflow to periodically clean ou
     - airflow_log_cleanup__enable_delete_child_log - boolean (True/False) - Whether to delete files from the Child Log directory defined under [scheduler] in the airflow.cfg file
 
 4. Ensure the `airflow` user can passwordless SSH on the hosts listed in `AIRFLOW_HOSTS`
-   1. Create a public and private key SSH key on all the worker nodes. You can follow these instructions: https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys--2
+   1. Create a public and private key SSH key on all the worker nodes. You can follow these instructions: <https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys--2>
    2. Add the public key content to the ~/.ssh/authorized_keys file on all the other machines
 
-5.  Enable the DAG in the Airflow Webserver
+5. Enable the DAG in the Airflow Webserver

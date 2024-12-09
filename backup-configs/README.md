@@ -16,5 +16,4 @@ A maintenance workflow that you can deploy into Airflow to periodically take bac
         
 4. Update the global variables (SCHEDULE_INTERVAL, DAG_OWNER_NAME, ALERT_EMAIL_ADDRESSES, BACKUP_FOLDER_DATE_FORMAT, BACKUP_HOME_DIRECTORY, BACKUPS_ENABLED, and BACKUP_RETENTION_COUNT) in the DAG with the desired values
 
-6. Enable the DAG in the Airflow Webserver
-
+5. Enable the DAG in the Airflow Webserver

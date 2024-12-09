@@ -5,16 +5,15 @@ airflow trigger_dag --conf '[curly-braces]"maxLogAgeInDays":30[curly-braces]' ai
 --conf options:
     maxLogAgeInDays:<INT> - Optional
 """
+
 import logging
 import os
-import time
 from datetime import timedelta
 
 import airflow
 from airflow.configuration import conf
 from airflow.models import DAG, Variable
-from airflow.operators.bash_operator import BashOperator
-from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.bash import BashOperator
 
 # airflow-log-cleanup
 DAG_ID = os.path.basename(__file__).replace(".pyc", "").replace(".py", "")
@@ -60,23 +59,24 @@ if ENABLE_DELETE_CHILD_LOG.lower() == "true":
         CHILD_PROCESS_LOG_DIRECTORY = conf.get(
             "scheduler", "CHILD_PROCESS_LOG_DIRECTORY"
         )
-        if CHILD_PROCESS_LOG_DIRECTORY != ' ':
+        if CHILD_PROCESS_LOG_DIRECTORY != " ":
             DIRECTORIES_TO_DELETE.append(CHILD_PROCESS_LOG_DIRECTORY)
     except Exception as e:
         logging.exception(
-            "Could not obtain CHILD_PROCESS_LOG_DIRECTORY from " +
-            "Airflow Configurations: " + str(e)
+            "Could not obtain CHILD_PROCESS_LOG_DIRECTORY from "
+            + "Airflow Configurations: "
+            + str(e)
         )
 
 default_args = {
-    'owner': DAG_OWNER_NAME,
-    'depends_on_past': False,
-    'email': ALERT_EMAIL_ADDRESSES,
-    'email_on_failure': True,
-    'email_on_retry': False,
-    'start_date': START_DATE,
-    'retries': 1,
-    'retry_delay': timedelta(minutes=1)
+    "owner": DAG_OWNER_NAME,
+    "depends_on_past": False,
+    "email": ALERT_EMAIL_ADDRESSES,
+    "email_on_failure": True,
+    "email_on_retry": False,
+    "start_date": START_DATE,
+    "retries": 1,
+    "retry_delay": timedelta(minutes=1),
 }
 
 dag = DAG(
@@ -84,11 +84,11 @@ dag = DAG(
     default_args=default_args,
     schedule_interval=SCHEDULE_INTERVAL,
     start_date=START_DATE,
-    tags=['teamclairvoyant', 'airflow-maintenance-dags']
+    tags=["teamclairvoyant", "airflow-maintenance-dags"],
 )
-if hasattr(dag, 'doc_md'):
+if hasattr(dag, "doc_md"):
     dag.doc_md = __doc__
-if hasattr(dag, 'catchup'):
+if hasattr(dag, "catchup"):
     dag.catchup = False
 
 log_cleanup = """
@@ -158,7 +158,7 @@ echo "Finished Running Cleanup Process"
 """
 
 create_log_cleanup_script = BashOperator(
-    task_id=f'create_log_cleanup_script',
+    task_id=f"create_log_cleanup_script",
     bash_command=f"""
     echo '{log_cleanup}' > {TEMP_LOG_CLEANUP_SCRIPT_PATH}
     chmod +x {TEMP_LOG_CLEANUP_SCRIPT_PATH}
@@ -177,19 +177,21 @@ create_log_cleanup_script = BashOperator(
         fi
     done
     """,
-    dag=dag)
+    dag=dag,
+)
 
 for host in AIRFLOW_HOSTS.split(","):
     for DIR_ID, DIRECTORY in enumerate(DIRECTORIES_TO_DELETE):
-        LOG_CLEANUP_COMMAND = f'{TEMP_LOG_CLEANUP_SCRIPT_PATH} {DIRECTORY} {DEFAULT_MAX_LOG_AGE_IN_DAYS} {str(ENABLE_DELETE).lower()}'
+        LOG_CLEANUP_COMMAND = f"{TEMP_LOG_CLEANUP_SCRIPT_PATH} {DIRECTORY} {DEFAULT_MAX_LOG_AGE_IN_DAYS} {str(ENABLE_DELETE).lower()}"
         cleanup_task = BashOperator(
-            task_id=f'airflow_log_cleanup_{host}_dir_{DIR_ID}',
+            task_id=f"airflow_log_cleanup_{host}_dir_{DIR_ID}",
             bash_command=f"""
             echo "Executing cleanup script..."
             ssh -o StrictHostKeyChecking=no {host} "{LOG_CLEANUP_COMMAND}"
             echo "Removing cleanup script..."
             ssh -o StrictHostKeyChecking=no {host} "rm {TEMP_LOG_CLEANUP_SCRIPT_PATH}"
             """,
-            dag=dag)
+            dag=dag,
+        )
 
         cleanup_task.set_upstream(create_log_cleanup_script)
